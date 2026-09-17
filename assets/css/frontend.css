@@ -1,0 +1,441 @@
+/**
+ * Imprenta Online — Addons · frontend
+ *
+ * Paleta de marca. Mantiene la estructura visual de referencia (cabeceras
+ * oscuras, tarjetas con acento, caja de resumen) con los colores de Imprenta
+ * Online. Nada de esta hoja alcanza a la galería del producto: todos los
+ * selectores cuelgan de .io-addons.
+ */
+
+.io-addons {
+	--io-blue: #2E509E;
+	--io-white: #F9FAFB;
+	--io-orange: #FF6B00;
+	--io-orange-dark: #E05F00;
+	--io-black: #1D1D1A;
+	--io-muted: #6B6B66;
+	--io-line: #E5E7EB;
+	--io-radius: 14px;
+
+	background: var(--io-white);
+	border: 1px solid var(--io-line);
+	border-radius: var(--io-radius);
+	padding: 18px;
+	margin: 0 0 22px;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.io-addons *,
+.io-addons *::before,
+.io-addons *::after {
+	box-sizing: border-box;
+}
+
+.io-addons .is-hidden {
+	display: none !important;
+}
+
+/* --- Grupo ------------------------------------------------------------- */
+
+.io-group {
+	margin: 0 0 20px;
+}
+
+.io-group:last-of-type {
+	margin-bottom: 14px;
+}
+
+.io-group__head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	background: var(--io-black);
+	border-left: 4px solid var(--io-orange);
+	border-radius: 10px;
+	padding: 10px 14px;
+	margin: 0 0 12px;
+	box-shadow: 0 2px 8px rgba(29, 29, 26, 0.12);
+}
+
+.io-group__title {
+	color: #fff;
+	font-weight: 700;
+	font-size: 0.86rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	line-height: 1.3;
+}
+
+.io-group__subtitle {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.78rem;
+	line-height: 1.3;
+}
+
+.io-group__badge {
+	margin-left: auto;
+	background: var(--io-orange);
+	color: #fff;
+	font-size: 0.68rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 3px 9px;
+	border-radius: 999px;
+}
+
+.io-group__note {
+	color: var(--io-muted);
+	font-size: 0.84rem;
+	line-height: 1.5;
+	margin: 0 0 12px;
+}
+
+.io-group__note p {
+	margin: 0 0 6px;
+}
+
+.io-group--notice .io-group__note {
+	background: rgba(46, 80, 158, 0.06);
+	border-left: 3px solid var(--io-blue);
+	border-radius: 0 8px 8px 0;
+	padding: 10px 12px;
+	color: var(--io-black);
+}
+
+/* --- Ítems ------------------------------------------------------------- */
+
+.io-items {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.io-item-wrap {
+	border: 2px solid var(--io-orange);
+	border-radius: var(--io-radius);
+	background: #fff;
+	transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.io-item-wrap.is-selected {
+	border-color: var(--io-orange-dark);
+	box-shadow: inset 0 0 0 1px var(--io-orange-dark), 0 3px 12px rgba(255, 107, 0, 0.18);
+}
+
+.io-item-wrap.is-blocked {
+	opacity: 0.5;
+}
+
+.io-item-wrap.is-included,
+.io-item-wrap.is-mandatory {
+	border-color: var(--io-blue);
+}
+
+.io-item {
+	display: block;
+	position: relative;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.io-item-wrap.is-blocked .io-item {
+	cursor: not-allowed;
+}
+
+/* El input nativo se oculta: toda la interacción visual es sobre la tarjeta. */
+.io-item__input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none;
+}
+
+.io-item__body {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 14px;
+}
+
+.io-item__thumb {
+	width: 50px;
+	height: 50px;
+	border-radius: 9px;
+	object-fit: cover;
+	flex: 0 0 50px;
+	display: block;
+}
+
+.io-item__text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.io-item__title {
+	color: var(--io-black);
+	font-weight: 600;
+	font-size: 0.94rem;
+	line-height: 1.3;
+}
+
+.io-item__desc {
+	color: var(--io-muted);
+	font-size: 0.79rem;
+	line-height: 1.4;
+}
+
+.io-item__price {
+	color: var(--io-orange);
+	font-weight: 700;
+	font-size: 0.92rem;
+	white-space: nowrap;
+	flex: 0 0 auto;
+	margin-left: auto;
+}
+
+.io-item__price.is-static {
+	color: var(--io-blue);
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+/* --- Ejes (fuera del label, para que no alternen la selección del ítem) -- */
+
+.io-axes {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	transition: max-height 0.22s ease, opacity 0.18s ease;
+}
+
+.io-item-wrap.is-expanded .io-axes {
+	max-height: 600px;
+	opacity: 1;
+}
+
+.io-axis {
+	border-top: 1px solid var(--io-line);
+	padding: 10px 14px;
+}
+
+.io-axis__name {
+	display: block;
+	color: var(--io-muted);
+	font-size: 0.74rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin: 0 0 7px;
+}
+
+.io-axis__options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+
+.io-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	position: relative;
+	margin: 0;
+	padding: 5px 11px;
+	border: 1px solid var(--io-line);
+	border-radius: 999px;
+	background: var(--io-white);
+	color: var(--io-black);
+	font-size: 0.81rem;
+	line-height: 1.4;
+	cursor: pointer;
+	transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.io-pill__input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none;
+}
+
+.io-pill:hover {
+	border-color: var(--io-blue);
+}
+
+.io-pill.is-checked,
+.io-pill:has(.io-pill__input:checked) {
+	border-color: var(--io-blue);
+	background: var(--io-blue);
+	color: #fff;
+}
+
+.io-pill__thumb {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	object-fit: cover;
+	display: block;
+}
+
+.io-pill__price {
+	font-weight: 700;
+	color: var(--io-orange);
+}
+
+.io-pill.is-checked .io-pill__price,
+.io-pill:has(.io-pill__input:checked) .io-pill__price {
+	color: #fff;
+}
+
+/* Fallback para navegadores sin :has() — el JS no depende de esto. */
+.io-pill__input:focus-visible + .io-pill__label {
+	outline: 2px solid var(--io-blue);
+	outline-offset: 2px;
+}
+
+/* --- Campos de personalización ----------------------------------------- */
+
+.io-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.io-field__label {
+	display: block;
+	color: var(--io-black);
+	font-size: 0.84rem;
+	font-weight: 600;
+	margin: 0 0 5px;
+}
+
+.io-field__label .required {
+	color: var(--io-orange);
+	border: 0;
+	text-decoration: none;
+}
+
+.io-addons .io-field__input {
+	width: 100%;
+	border: 1px solid var(--io-line);
+	border-radius: 9px;
+	padding: 9px 11px;
+	background: #fff;
+	color: var(--io-black);
+	font-size: 0.88rem;
+}
+
+.io-addons .io-field__input:focus {
+	border-color: var(--io-blue);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(46, 80, 158, 0.14);
+}
+
+/* --- Resumen ----------------------------------------------------------- */
+
+.io-summary {
+	background: var(--io-black);
+	border-radius: var(--io-radius);
+	padding: 16px 18px;
+	color: #fff;
+}
+
+.io-summary__head {
+	font-size: 0.74rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: rgba(255, 255, 255, 0.55);
+	margin: 0 0 10px;
+}
+
+.io-summary__line {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 14px;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	padding: 3px 0;
+}
+
+.io-summary__label {
+	color: rgba(255, 255, 255, 0.82);
+	min-width: 0;
+	word-break: break-word;
+}
+
+.io-summary__amount {
+	color: var(--io-orange);
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.io-summary__line--base .io-summary__amount {
+	color: rgba(255, 255, 255, 0.82);
+	font-weight: 500;
+}
+
+.io-summary__total {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 14px;
+	border-top: 1px solid rgba(255, 255, 255, 0.16);
+	margin-top: 10px;
+	padding-top: 11px;
+	font-size: 1.06rem;
+	font-weight: 700;
+}
+
+.io-summary__total span:last-child {
+	color: var(--io-orange);
+}
+
+/* Los importes de WooCommerce dentro del bloque siguen la paleta. */
+.io-addons .woocommerce-Price-amount {
+	color: inherit;
+}
+
+/* --- Responsive -------------------------------------------------------- */
+
+@media (max-width: 600px) {
+	.io-addons {
+		padding: 14px;
+	}
+
+	.io-item__body {
+		padding: 10px 11px;
+		gap: 10px;
+	}
+
+	.io-item__thumb {
+		width: 40px;
+		height: 40px;
+		flex-basis: 40px;
+	}
+
+	.io-item__title {
+		font-size: 0.88rem;
+	}
+
+	.io-item__price {
+		font-size: 0.85rem;
+	}
+
+	.io-summary {
+		padding: 14px;
+	}
+}

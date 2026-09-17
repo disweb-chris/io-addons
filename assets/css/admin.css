@@ -1,0 +1,204 @@
+/**
+ * Imprenta Online — Addons · editor del admin
+ */
+
+.io-admin {
+	--io-blue: #2E509E;
+	--io-orange: #FF6B00;
+	--io-black: #1D1D1A;
+	--io-line: #dcdcde;
+	--io-bg: #f6f7f7;
+}
+
+.io-admin__intro {
+	color: #50575e;
+	margin: 0 0 14px;
+}
+
+.io-admin__group {
+	border: 1px solid var(--io-line);
+	border-left: 4px solid var(--io-orange);
+	border-radius: 8px;
+	background: #fff;
+	padding: 14px;
+	margin: 0 0 16px;
+}
+
+.io-admin__group-head {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 0 0 12px;
+	border-bottom: 1px solid var(--io-line);
+	margin: 0 0 12px;
+}
+
+.io-admin__group-index {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--io-black);
+	color: #fff;
+	font-weight: 700;
+	font-size: 12px;
+	flex: 0 0 26px;
+	margin-bottom: 4px;
+}
+
+.io-admin__row {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin: 0 0 10px;
+}
+
+.io-admin__row--head {
+	padding-bottom: 8px;
+	border-bottom: 1px dashed var(--io-line);
+}
+
+.io-admin__field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+.io-admin__field--sm {
+	flex: 0 0 160px;
+}
+
+.io-admin__field-label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #646970;
+}
+
+.io-admin .io-admin__input {
+	width: 100%;
+	max-width: 100%;
+}
+
+.io-admin__check {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	white-space: nowrap;
+	margin-bottom: 4px;
+}
+
+.io-admin__block {
+	background: var(--io-bg);
+	border-radius: 6px;
+	padding: 10px 12px;
+	margin: 0 0 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.io-admin__block-title {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #646970;
+}
+
+.io-admin__hint {
+	color: #646970;
+	font-style: italic;
+	font-size: 12px;
+	margin: 0 0 10px;
+}
+
+.io-admin__items {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 0 0 12px;
+}
+
+.io-admin__item {
+	border: 1px solid var(--io-line);
+	border-left: 3px solid var(--io-blue);
+	border-radius: 6px;
+	background: #fff;
+	padding: 12px;
+}
+
+.io-admin__axes {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.io-admin__axis {
+	border: 1px dashed var(--io-line);
+	border-radius: 6px;
+	padding: 10px;
+	background: #fff;
+}
+
+.io-admin__options {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 8px;
+	align-items: flex-start;
+}
+
+.io-admin__option {
+	display: flex;
+	align-items: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+	width: 100%;
+	padding: 8px;
+	background: var(--io-bg);
+	border-radius: 5px;
+}
+
+.io-admin__image {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 10px;
+}
+
+.io-admin__thumb img {
+	width: 44px;
+	height: 44px;
+	object-fit: cover;
+	border-radius: 5px;
+	display: block;
+	border: 1px solid var(--io-line);
+}
+
+.io-admin__remove {
+	margin-bottom: 4px;
+	flex: 0 0 auto;
+}
+
+.io-admin__variations {
+	max-width: 340px;
+}
+
+.io-admin__actions {
+	margin: 4px 0 0;
+}
+
+@media (max-width: 782px) {
+	.io-admin__field,
+	.io-admin__field--sm {
+		flex: 1 1 100%;
+	}
+}
