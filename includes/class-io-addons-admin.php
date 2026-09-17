@@ -419,24 +419,64 @@ class IO_Addons_Admin {
 			wp_send_json_success( array( 'products' => array() ) );
 		}
 
+		// Palabras a exigir en el título, sin acentos y en minúsculas: el 's' de
+		// WP_Query puede devolver de más si hay un plugin de búsqueda/relevancia
+		// activo (SEO, indexador, etc.) que reordena o amplía por relevancia en
+		// vez de hacer un LIKE literal. Filtramos en PHP como garantía.
+		$needles = array_filter( explode( ' ', remove_accents( mb_strtolower( $term ) ) ) );
+
 		$query = new WP_Query(
 			array(
 				'post_type'      => 'product',
 				'post_status'    => 'publish',
 				's'              => $term,
-				'posts_per_page' => 20,
+				'posts_per_page' => 50,
 				'fields'         => 'ids',
 				'orderby'        => 'title',
 				'order'          => 'ASC',
 			)
 		);
 
+		$candidates = $query->posts;
+
+		// Si la búsqueda por frase completa no encontró nada (título real distinto
+		// al orden exacto de palabras, ej. "Impresión a Todo Color"), reintentamos
+		// con la primera palabra sola para tener candidatos de sobra y filtrar acá.
+		if ( empty( $candidates ) && count( $needles ) > 1 ) {
+			$broader = new WP_Query(
+				array(
+					'post_type'      => 'product',
+					'post_status'    => 'publish',
+					's'              => reset( $needles ),
+					'posts_per_page' => 100,
+					'fields'         => 'ids',
+					'orderby'        => 'title',
+					'order'          => 'ASC',
+				)
+			);
+			$candidates = $broader->posts;
+		}
+
 		$products = array();
 
-		foreach ( $query->posts as $product_id ) {
+		foreach ( $candidates as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( ! $product ) {
+				continue;
+			}
+
+			$haystack = remove_accents( mb_strtolower( $product->get_name() ) );
+			$matches  = true;
+
+			foreach ( $needles as $needle ) {
+				if ( false === mb_strpos( $haystack, $needle ) ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( ! $matches ) {
 				continue;
 			}
 
@@ -444,6 +484,10 @@ class IO_Addons_Admin {
 				'id'    => $product_id,
 				'title' => $product->get_name(),
 			);
+
+			if ( count( $products ) >= 20 ) {
+				break;
+			}
 		}
 
 		wp_send_json_success( array( 'products' => $products ) );
