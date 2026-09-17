@@ -4,7 +4,8 @@
  *
  * Un CPT con exactamente la misma estructura de config que un producto. Permite
  * "todos los productos de la categoría Cuadernos llevan anillado y laminado",
- * con opt-out por producto para la plantilla genérica.
+ * o "estos 5 productos puntuales, sea cual sea su categoría", con opt-out por
+ * producto para la plantilla genérica.
  *
  * @package IO_Addons
  */
@@ -19,6 +20,7 @@ class IO_Addons_Templates {
 	const META_CATEGORIES = '_io_addons_template_categories';
 	const META_GENERIC    = '_io_addons_template_generic';
 	const META_PRIORITY   = '_io_addons_template_priority';
+	const META_PRODUCTS   = '_io_addons_template_products';
 
 	/**
 	 * Hooks.
@@ -65,8 +67,14 @@ class IO_Addons_Templates {
 	/**
 	 * Devuelve la config de plantilla que le corresponde a un producto.
 	 *
-	 * Primero busca una plantilla asociada a alguna de sus categorías; si no hay,
-	 * cae en la plantilla genérica (salvo que el producto tenga opt-out).
+	 * Cascada de resolución (dentro de lo que resuelve esta clase; la config
+	 * propia del producto, si existe, ya se resolvió antes de llegar acá):
+	 *   1. Plantilla con este producto marcado como "producto específico"
+	 *      (gana a la asociación por categoría, sin importar la prioridad
+	 *      manual de la plantilla: es una asociación más puntual).
+	 *   2. Plantilla asociada a alguna de sus categorías (o categorías ancestro).
+	 *   3. Plantilla genérica (salvo que el producto tenga opt-out).
+	 *   4. Vacío.
 	 *
 	 * @param int $product_id Product ID.
 	 * @return array
@@ -76,6 +84,14 @@ class IO_Addons_Templates {
 
 		if ( empty( $templates ) ) {
 			return io_addons_empty_config();
+		}
+
+		$product_id = absint( $product_id );
+
+		foreach ( $templates as $template ) {
+			if ( ! empty( $template['products'] ) && in_array( $product_id, $template['products'], true ) ) {
+				return $template['config'];
+			}
 		}
 
 		$term_ids = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
@@ -142,10 +158,14 @@ class IO_Addons_Templates {
 			$categories = get_post_meta( $post->ID, self::META_CATEGORIES, true );
 			$categories = is_array( $categories ) ? array_map( 'absint', $categories ) : array();
 
+			$products = get_post_meta( $post->ID, self::META_PRODUCTS, true );
+			$products = is_array( $products ) ? array_map( 'absint', $products ) : array();
+
 			$templates[] = array(
 				'id'         => $post->ID,
 				'title'      => $post->post_title,
 				'categories' => $categories,
+				'products'   => $products,
 				'generic'    => (bool) get_post_meta( $post->ID, self::META_GENERIC, true ),
 				'priority'   => (int) get_post_meta( $post->ID, self::META_PRIORITY, true ),
 				'config'     => io_addons_get_raw_config( $post->ID ),
