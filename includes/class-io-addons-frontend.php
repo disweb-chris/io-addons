@@ -135,7 +135,11 @@ class IO_Addons_Frontend {
 			'ioAddonsSettings',
 			array(
 				'currencyFormat' => array(
-					'symbol'    => get_woocommerce_currency_symbol(),
+					// get_woocommerce_currency_symbol() devuelve el símbolo como entidad HTML
+					// (ej. "&#36;"), pensado para insertarse con innerHTML. El JS arma el
+					// importe como texto plano y lo asigna con textContent, así que sin
+					// decodificar acá se veía literal "&#36; 1.000" en vez de "$ 1.000".
+					'symbol'    => html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ),
 					'decimals'  => io_addons_price_decimals(),
 					'decimalSep' => wc_get_price_decimal_separator(),
 					'thousandSep' => wc_get_price_thousand_separator(),
@@ -337,6 +341,26 @@ class IO_Addons_Frontend {
 
 		echo '</span>'; // .io-item__body
 		echo '</label>';
+
+		// Fuera del <label>, mismo motivo que los ejes: no queremos que tocar el
+		// stepper alterne la selección del ítem.
+		if ( $item['allow_qty'] ) {
+			$qty_id = 'io-qty-' . $item['id'];
+
+			echo '<div class="io-qty">';
+			echo '<span class="io-qty__label">' . esc_html__( 'Cantidad', 'io-addons' ) . '</span>';
+			echo '<span class="io-qty__control">';
+			echo '<button type="button" class="io-qty__btn" data-io-qty-minus aria-label="' . esc_attr__( 'Restar', 'io-addons' ) . '">−</button>';
+			printf(
+				'<input type="number" class="io-qty__input" id="%1$s" name="%2$s" value="1" min="1"%3$s inputmode="numeric" />',
+				esc_attr( $qty_id ),
+				esc_attr( 'io_addons[qty][' . $item['id'] . ']' ),
+				null !== $item['max_qty'] ? ' max="' . esc_attr( $item['max_qty'] ) . '"' : ''
+			);
+			echo '<button type="button" class="io-qty__btn" data-io-qty-plus aria-label="' . esc_attr__( 'Sumar', 'io-addons' ) . '">+</button>';
+			echo '</span>';
+			echo '</div>';
+		}
 
 		if ( ! empty( $item['axes'] ) ) {
 			echo '<div class="io-axes">';

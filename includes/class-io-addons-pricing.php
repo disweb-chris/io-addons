@@ -58,6 +58,7 @@ class IO_Addons_Pricing {
 			'items'  => array(),
 			'axes'   => array(),
 			'fields' => array(),
+			'qty'    => array(),
 		);
 
 		if ( ! is_array( $raw ) ) {
@@ -123,7 +124,45 @@ class IO_Addons_Pricing {
 			}
 		}
 
+		if ( isset( $raw['qty'] ) && is_array( $raw['qty'] ) ) {
+			foreach ( $raw['qty'] as $item_id => $value ) {
+				$item_id = sanitize_key( $item_id );
+				if ( '' === $item_id ) {
+					continue;
+				}
+				$qty = absint( $value );
+				if ( $qty > 0 ) {
+					$selection['qty'][ $item_id ] = $qty;
+				}
+			}
+		}
+
 		return $selection;
+	}
+
+	/**
+	 * Resuelve la cantidad elegida para un ítem, acotada a sus límites.
+	 *
+	 * Si el ítem no permite cantidad, siempre es 1 (no hay stepper que leer).
+	 *
+	 * @param array $item      Ítem sanitizado.
+	 * @param array $selection Selección sanitizada.
+	 * @return int
+	 */
+	public static function resolve_qty( $item, $selection ) {
+		if ( empty( $item['allow_qty'] ) ) {
+			return 1;
+		}
+
+		$qty = isset( $selection['qty'][ $item['id'] ] ) ? absint( $selection['qty'][ $item['id'] ] ) : 1;
+		$qty = max( 1, $qty );
+
+		if ( null !== $item['max_qty'] ) {
+			$qty = min( $qty, (int) $item['max_qty'] );
+		}
+
+		// Techo defensivo: ninguna cantidad de addon tiene sentido por encima de esto.
+		return min( $qty, 999 );
 	}
 
 	/**
@@ -353,6 +392,12 @@ class IO_Addons_Pricing {
 					}
 				}
 
+				$qty = self::resolve_qty( $item, $selection );
+
+				if ( ! $item['included'] && ! $is_free ) {
+					$amount = round( $amount * $qty, $decimals );
+				}
+
 				$extra += $amount;
 
 				$result['lines'][] = array(
@@ -360,6 +405,7 @@ class IO_Addons_Pricing {
 					'item'   => $item['title'],
 					'value'  => implode( ' · ', $axis_labels ),
 					'amount' => $amount,
+					'qty'    => $qty,
 					'kind'   => $item['included'] ? 'included' : 'item',
 				);
 			}

@@ -330,6 +330,8 @@ class IO_Addons_Admin {
 					'mandatory'      => __( 'Obligatoria (no se puede desmarcar)', 'io-addons' ),
 					'included'       => __( 'Ya incluida en el precio', 'io-addons' ),
 					'defaultOn'      => __( 'Marcada por defecto', 'io-addons' ),
+					'allowQty'       => __( 'Permite elegir cantidad', 'io-addons' ),
+					'maxQty'         => __( 'Cantidad máxima (vacío = sin límite)', 'io-addons' ),
 					'axes'           => __( 'Ejes (color, grosor, acabado…)', 'io-addons' ),
 					'addAxis'        => __( '+ Añadir eje', 'io-addons' ),
 					'axisName'       => __( 'Nombre del eje', 'io-addons' ),
@@ -419,24 +421,62 @@ class IO_Addons_Admin {
 			wp_send_json_success( array( 'products' => array() ) );
 		}
 
+		// Palabras a exigir en el título, sin acentos y en minúsculas: cada una
+		// tiene que ser el INICIO de alguna palabra del título.
+		$needles = array_values( array_filter( explode( ' ', remove_accents( mb_strtolower( $term ) ) ) ) );
+
+		if ( empty( $needles ) ) {
+			wp_send_json_success( array( 'products' => array() ) );
+		}
+
+		// Traemos los productos directo, sin pasar por el parámetro 's' de
+		// WP_Query: si hay un plugin de búsqueda/SEO/indexado activo que altera
+		// posts_search o the_posts (relevancia, sinónimos, índice desactualizado),
+		// 's' deja de ser una fuente confiable — a veces trae de más, a veces se
+		// queda corto. Filtramos el 100% acá, sobre el título real del producto.
 		$query = new WP_Query(
 			array(
-				'post_type'      => 'product',
-				'post_status'    => 'publish',
-				's'              => $term,
-				'posts_per_page' => 20,
-				'fields'         => 'ids',
-				'orderby'        => 'title',
-				'order'          => 'ASC',
+				'post_type'        => 'product',
+				'post_status'      => 'publish',
+				'posts_per_page'   => 2000,
+				'fields'           => 'ids',
+				'orderby'          => 'title',
+				'order'            => 'ASC',
+				'suppress_filters' => true,
 			)
 		);
 
-		$products = array();
+		$candidates = $query->posts;
+		$products   = array();
 
-		foreach ( $query->posts as $product_id ) {
+		foreach ( $candidates as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( ! $product ) {
+				continue;
+			}
+
+			$haystack_words = preg_split( '/[^\p{L}\p{N}]+/u', remove_accents( mb_strtolower( $product->get_name() ) ) );
+			$haystack_words = $haystack_words ? array_values( array_filter( $haystack_words ) ) : array();
+			$matches        = true;
+
+			foreach ( $needles as $needle ) {
+				$needle_found = false;
+
+				foreach ( $haystack_words as $word ) {
+					if ( 0 === mb_strpos( $word, $needle ) ) {
+						$needle_found = true;
+						break;
+					}
+				}
+
+				if ( ! $needle_found ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( ! $matches ) {
 				continue;
 			}
 
@@ -444,6 +484,10 @@ class IO_Addons_Admin {
 				'id'    => $product_id,
 				'title' => $product->get_name(),
 			);
+
+			if ( count( $products ) >= 20 ) {
+				break;
+			}
 		}
 
 		wp_send_json_success( array( 'products' => $products ) );

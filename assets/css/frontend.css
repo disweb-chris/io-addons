@@ -51,12 +51,12 @@
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
-	background: var(--io-black);
+	background: var(--io-blue);
 	border-left: 4px solid var(--io-orange);
 	border-radius: 10px;
 	padding: 10px 14px;
 	margin: 0 0 12px;
-	box-shadow: 0 2px 8px rgba(29, 29, 26, 0.12);
+	box-shadow: 0 2px 8px rgba(46, 80, 158, 0.18);
 }
 
 .io-group__title {
@@ -211,16 +211,102 @@
 
 /* --- Ejes (fuera del label, para que no alternen la selección del ítem) -- */
 
-.io-axes {
+.io-axes,
+.io-qty {
 	max-height: 0;
 	opacity: 0;
 	overflow: hidden;
 	transition: max-height 0.22s ease, opacity 0.18s ease;
 }
 
-.io-item-wrap.is-expanded .io-axes {
+.io-item-wrap.is-expanded .io-axes,
+.io-item-wrap.is-expanded .io-qty {
 	max-height: 600px;
 	opacity: 1;
+}
+
+.io-qty {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	border-top: 1px solid var(--io-line);
+	padding: 10px 14px;
+}
+
+.io-qty__label {
+	color: var(--io-muted);
+	font-size: 0.74rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* !important a propósito: el tema aplica sus propios anchos/paddings a los
+   input[type=number] y botones dentro de form.cart, y sin esto el stepper
+   se ve estirado en vez de un control chico y compacto. */
+.io-qty__control {
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
+	align-items: center !important;
+	gap: 0 !important;
+	width: auto !important;
+	border: 1px solid var(--io-line);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.io-qty__btn {
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
+	align-items: center;
+	justify-content: center;
+	width: 26px !important;
+	height: 26px !important;
+	min-width: 26px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: var(--io-white);
+	color: var(--io-blue);
+	font-size: 1rem;
+	line-height: 1;
+	cursor: pointer;
+	box-shadow: none !important;
+}
+
+.io-qty__btn:hover {
+	background: var(--io-line);
+}
+
+.io-qty__input {
+	flex: 0 0 auto !important;
+	width: 30px !important;
+	min-width: 30px !important;
+	max-width: 30px !important;
+	height: 26px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	border-left: 1px solid var(--io-line) !important;
+	border-right: 1px solid var(--io-line) !important;
+	border-radius: 0 !important;
+	background: #fff;
+	text-align: center;
+	font: inherit;
+	font-weight: 700;
+	font-size: 0.85rem;
+	color: var(--io-black);
+	line-height: 26px !important;
+	box-shadow: none !important;
+	-moz-appearance: textfield;
+}
+
+.io-qty__input::-webkit-outer-spin-button,
+.io-qty__input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 .io-axis {
@@ -346,7 +432,7 @@
 /* --- Resumen ----------------------------------------------------------- */
 
 .io-summary {
-	background: var(--io-black);
+	background: var(--io-blue);
 	border-radius: var(--io-radius);
 	padding: 16px 18px;
 	color: #fff;
@@ -378,7 +464,7 @@
 }
 
 .io-summary__amount {
-	color: var(--io-orange);
+	color: #fff;
 	font-weight: 700;
 	white-space: nowrap;
 }
@@ -401,7 +487,7 @@
 }
 
 .io-summary__total span:last-child {
-	color: var(--io-orange);
+	color: #fff;
 }
 
 /* Los importes de WooCommerce dentro del bloque siguen la paleta. */
