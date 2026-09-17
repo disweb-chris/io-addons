@@ -27,6 +27,7 @@ class IO_Addons_Admin {
 		add_action( 'save_post_' . IO_ADDONS_TEMPLATE_CPT, array( $this, 'save_template' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'wp_ajax_io_addons_get_variations', array( $this, 'ajax_get_variations' ) );
+		add_action( 'wp_ajax_io_addons_search_products', array( $this, 'ajax_search_products' ) );
 	}
 
 	/**
@@ -96,10 +97,33 @@ class IO_Addons_Admin {
 	 * @param WP_Post $post Post actual.
 	 */
 	public function render_template_box( $post ) {
-		$selected = get_post_meta( $post->ID, IO_Addons_Templates::META_CATEGORIES, true );
-		$selected = is_array( $selected ) ? array_map( 'absint', $selected ) : array();
-		$generic  = (bool) get_post_meta( $post->ID, IO_Addons_Templates::META_GENERIC, true );
-		$priority = (int) get_post_meta( $post->ID, IO_Addons_Templates::META_PRIORITY, true );
+		$selected      = get_post_meta( $post->ID, IO_Addons_Templates::META_CATEGORIES, true );
+		$selected      = is_array( $selected ) ? array_map( 'absint', $selected ) : array();
+		$generic       = (bool) get_post_meta( $post->ID, IO_Addons_Templates::META_GENERIC, true );
+		$priority      = (int) get_post_meta( $post->ID, IO_Addons_Templates::META_PRIORITY, true );
+		$product_ids   = get_post_meta( $post->ID, IO_Addons_Templates::META_PRODUCTS, true );
+		$product_ids   = is_array( $product_ids ) ? array_map( 'absint', $product_ids ) : array();
+
+		echo '<p><label><strong>' . esc_html__( 'Productos específicos', 'io-addons' ) . '</strong></label></p>';
+		echo '<div class="io-tpl-products" data-io-product-picker>';
+		echo '<input type="text" class="io-admin__input" data-io-product-search autocomplete="off" placeholder="' . esc_attr__( 'Buscar producto por nombre…', 'io-addons' ) . '" />';
+		echo '<div class="io-tpl-products__results" data-io-product-results hidden></div>';
+		echo '<ul class="io-tpl-products__chips" data-io-product-chips>';
+		foreach ( $product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+			if ( ! $product ) {
+				continue;
+			}
+			printf(
+				'<li class="io-tpl-products__chip" data-id="%1$d">%2$s <button type="button" data-io-product-remove aria-label="%3$s">×</button><input type="hidden" name="io_addons_template_products[]" value="%1$d" /></li>',
+				absint( $product_id ),
+				esc_html( $product->get_name() ),
+				esc_attr__( 'Quitar', 'io-addons' )
+			);
+		}
+		echo '</ul>';
+		echo '</div>';
+		echo '<p class="description">' . esc_html__( 'Se aplica a estos productos puntuales, tengan o no marcada alguna de las categorías de abajo. Tiene prioridad sobre la asociación por categoría y sobre la genérica.', 'io-addons' ) . '</p>';
 
 		$terms = get_terms(
 			array(
@@ -229,6 +253,12 @@ class IO_Addons_Admin {
 
 		$this->save_config( $post_id );
 
+		$products = array();
+		if ( isset( $_POST['io_addons_template_products'] ) && is_array( $_POST['io_addons_template_products'] ) ) {
+			$products = array_values( array_unique( array_filter( array_map( 'absint', wp_unslash( $_POST['io_addons_template_products'] ) ) ) ) );
+		}
+		update_post_meta( $post_id, IO_Addons_Templates::META_PRODUCTS, $products );
+
 		$categories = array();
 		if ( isset( $_POST['io_addons_template_categories'] ) && is_array( $_POST['io_addons_template_categories'] ) ) {
 			$categories = array_values( array_filter( array_map( 'absint', wp_unslash( $_POST['io_addons_template_categories'] ) ) ) );
@@ -322,6 +352,9 @@ class IO_Addons_Admin {
 					'maxlength'      => __( 'Máx. caracteres', 'io-addons' ),
 					'confirmRemove'  => __( '¿Seguro que querés quitarlo?', 'io-addons' ),
 					'loading'        => __( 'Cargando…', 'io-addons' ),
+					'noProductResults' => __( 'No se encontraron productos.', 'io-addons' ),
+					'searchMinChars' => __( 'Escribí al menos 2 letras…', 'io-addons' ),
+					'removeProduct'  => __( 'Quitar', 'io-addons' ),
 				),
 			)
 		);
@@ -368,5 +401,51 @@ class IO_Addons_Admin {
 		}
 
 		wp_send_json_success( array( 'variations' => $variations ) );
+	}
+
+	/**
+	 * Busca productos por nombre para el selector de "productos específicos" de una plantilla.
+	 */
+	public function ajax_search_products() {
+		check_ajax_referer( 'io_addons_admin', 'nonce' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Sin permisos.', 'io-addons' ) ), 403 );
+		}
+
+		$term = isset( $_POST['term'] ) ? sanitize_text_field( wp_unslash( $_POST['term'] ) ) : '';
+
+		if ( mb_strlen( $term ) < 2 ) {
+			wp_send_json_success( array( 'products' => array() ) );
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				's'              => $term,
+				'posts_per_page' => 20,
+				'fields'         => 'ids',
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+			)
+		);
+
+		$products = array();
+
+		foreach ( $query->posts as $product_id ) {
+			$product = wc_get_product( $product_id );
+
+			if ( ! $product ) {
+				continue;
+			}
+
+			$products[] = array(
+				'id'    => $product_id,
+				'title' => $product->get_name(),
+			);
+		}
+
+		wp_send_json_success( array( 'products' => $products ) );
 	}
 }

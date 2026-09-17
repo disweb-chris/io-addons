@@ -797,7 +797,130 @@
 		}
 	}
 
+	/**
+	 * Selector de "productos específicos" del editor de plantillas: input de
+	 * búsqueda con resultados vía AJAX + chips de productos ya elegidos.
+	 *
+	 * @param {Element} root Contenedor [data-io-product-picker].
+	 */
+	function initProductPicker( root ) {
+		var input = root.querySelector( '[data-io-product-search]' );
+		var results = root.querySelector( '[data-io-product-results]' );
+		var chips = root.querySelector( '[data-io-product-chips]' );
+		var timer = null;
+		var selected = {};
+
+		Array.prototype.forEach.call( chips.querySelectorAll( '[data-id]' ), function ( chip ) {
+			var id = chip.getAttribute( 'data-id' );
+			selected[ id ] = true;
+
+			var remove = chip.querySelector( '[data-io-product-remove]' );
+
+			if ( remove ) {
+				remove.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+					delete selected[ id ];
+					chip.parentNode.removeChild( chip );
+				} );
+			}
+		} );
+
+		/**
+		 * Agrega un chip para un producto elegido (si no estaba ya).
+		 *
+		 * @param {string} id    Id de producto.
+		 * @param {string} title Título.
+		 */
+		function addChip( id, title ) {
+			if ( selected[ id ] ) {
+				return;
+			}
+
+			selected[ id ] = true;
+
+			var remove = el( 'button', { type: 'button', text: '×', 'aria-label': i18n.removeProduct || 'Quitar' } );
+			var hidden = el( 'input', { type: 'hidden', name: 'io_addons_template_products[]', value: id } );
+			var chip = el( 'li', { class: 'io-tpl-products__chip' }, [
+				document.createTextNode( title + ' ' ),
+				remove,
+				hidden
+			] );
+
+			chip.setAttribute( 'data-id', id );
+
+			remove.addEventListener( 'click', function ( event ) {
+				event.preventDefault();
+				delete selected[ id ];
+				chip.parentNode.removeChild( chip );
+			} );
+
+			chips.appendChild( chip );
+		}
+
+		/**
+		 * Pinta la lista de resultados de búsqueda.
+		 *
+		 * @param {Array} products Productos.
+		 */
+		function renderResults( products ) {
+			results.innerHTML = '';
+
+			if ( ! products.length ) {
+				results.appendChild( el( 'div', { class: 'io-tpl-products__empty', text: i18n.noProductResults || 'Sin resultados.' } ) );
+				results.hidden = false;
+				return;
+			}
+
+			products.forEach( function ( product ) {
+				var option = el( 'button', { type: 'button', class: 'io-tpl-products__result', text: product.title } );
+
+				option.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+					addChip( String( product.id ), product.title );
+					results.hidden = true;
+					input.value = '';
+				} );
+
+				results.appendChild( option );
+			} );
+
+			results.hidden = false;
+		}
+
+		input.addEventListener( 'input', function () {
+			var term = input.value.trim();
+
+			if ( timer ) {
+				clearTimeout( timer );
+			}
+
+			if ( term.length < 2 ) {
+				results.hidden = true;
+				return;
+			}
+
+			timer = setTimeout( function () {
+				$.post( cfg.ajaxUrl, {
+					action: 'io_addons_search_products',
+					nonce: cfg.nonce,
+					term: term
+				} ).done( function ( response ) {
+					if ( response && response.success ) {
+						renderResults( response.data.products || [] );
+					}
+				} );
+			}, 300 );
+		} );
+
+		$( document ).on( 'click', function ( event ) {
+			if ( ! results.contains( event.target ) && event.target !== input ) {
+				results.hidden = true;
+			}
+		} );
+	}
+
 	$( function () {
 		Array.prototype.forEach.call( document.querySelectorAll( '[data-io-admin]' ), initEditor );
+		Array.prototype.forEach.call( document.querySelectorAll( '[data-io-product-picker]' ), initProductPicker );
 	} );
 } )( jQuery );

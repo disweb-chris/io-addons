@@ -50,9 +50,12 @@ Todo lo que escribe en el meta pase por `io_addons_sanitize_config()`. Un solo p
 ### Resolución de config
 
 1. Config propia del producto (si tiene contenido real).
-2. Plantilla asociada a alguna de sus categorías (o categorías ancestro).
-3. Plantilla genérica, salvo opt-out del producto.
-4. Vacío.
+2. Plantilla que tiene a este producto marcado como "producto específico" — gana a la asociación por categoría sin importar la prioridad manual de la plantilla.
+3. Plantilla asociada a alguna de sus categorías (o categorías ancestro).
+4. Plantilla genérica, salvo opt-out del producto.
+5. Vacío.
+
+La asociación por "productos específicos" sirve para el caso "algunos productos de la categoría sí, el resto no": se busca el producto por nombre desde el editor de la plantilla (`_io_addons_template_products`) sin necesidad de reorganizar categorías ni tocar código.
 
 ### Precio
 
