@@ -419,46 +419,33 @@ class IO_Addons_Admin {
 			wp_send_json_success( array( 'products' => array() ) );
 		}
 
-		// Palabras a exigir en el título, sin acentos y en minúsculas. El 's' de
-		// WP_Query hace un LIKE '%término%' que matchea aunque el término caiga
-		// en medio de otra palabra (ej. "imp" dentro de "sIMPle") — filtramos acá
-		// exigiendo que cada palabra escrita sea el INICIO de alguna palabra del
-		// título, no una coincidencia en cualquier posición.
+		// Palabras a exigir en el título, sin acentos y en minúsculas: cada una
+		// tiene que ser el INICIO de alguna palabra del título.
 		$needles = array_values( array_filter( explode( ' ', remove_accents( mb_strtolower( $term ) ) ) ) );
 
+		if ( empty( $needles ) ) {
+			wp_send_json_success( array( 'products' => array() ) );
+		}
+
+		// Traemos los productos directo, sin pasar por el parámetro 's' de
+		// WP_Query: si hay un plugin de búsqueda/SEO/indexado activo que altera
+		// posts_search o the_posts (relevancia, sinónimos, índice desactualizado),
+		// 's' deja de ser una fuente confiable — a veces trae de más, a veces se
+		// queda corto. Filtramos el 100% acá, sobre el título real del producto.
 		$query = new WP_Query(
 			array(
-				'post_type'      => 'product',
-				'post_status'    => 'publish',
-				's'              => $term,
-				'posts_per_page' => 50,
-				'fields'         => 'ids',
-				'orderby'        => 'title',
-				'order'          => 'ASC',
+				'post_type'        => 'product',
+				'post_status'      => 'publish',
+				'posts_per_page'   => 2000,
+				'fields'           => 'ids',
+				'orderby'          => 'title',
+				'order'            => 'ASC',
+				'suppress_filters' => true,
 			)
 		);
 
 		$candidates = $query->posts;
-
-		// Si la búsqueda por frase completa no encontró nada (título real distinto
-		// al orden exacto de palabras, ej. "Impresión a Todo Color"), reintentamos
-		// con la primera palabra sola para tener candidatos de sobra y filtrar acá.
-		if ( empty( $candidates ) && count( $needles ) > 1 ) {
-			$broader = new WP_Query(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'publish',
-					's'              => reset( $needles ),
-					'posts_per_page' => 100,
-					'fields'         => 'ids',
-					'orderby'        => 'title',
-					'order'          => 'ASC',
-				)
-			);
-			$candidates = $broader->posts;
-		}
-
-		$products = array();
+		$products   = array();
 
 		foreach ( $candidates as $product_id ) {
 			$product = wc_get_product( $product_id );
