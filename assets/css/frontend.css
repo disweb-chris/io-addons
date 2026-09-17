@@ -51,12 +51,12 @@
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
-	background: var(--io-black);
+	background: var(--io-blue);
 	border-left: 4px solid var(--io-orange);
 	border-radius: 10px;
 	padding: 10px 14px;
 	margin: 0 0 12px;
-	box-shadow: 0 2px 8px rgba(29, 29, 26, 0.12);
+	box-shadow: 0 2px 8px rgba(46, 80, 158, 0.18);
 }
 
 .io-group__title {
@@ -211,16 +211,81 @@
 
 /* --- Ejes (fuera del label, para que no alternen la selección del ítem) -- */
 
-.io-axes {
+.io-axes,
+.io-qty {
 	max-height: 0;
 	opacity: 0;
 	overflow: hidden;
 	transition: max-height 0.22s ease, opacity 0.18s ease;
 }
 
-.io-item-wrap.is-expanded .io-axes {
+.io-item-wrap.is-expanded .io-axes,
+.io-item-wrap.is-expanded .io-qty {
 	max-height: 600px;
 	opacity: 1;
+}
+
+.io-qty {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	border-top: 1px solid var(--io-line);
+	padding: 10px 14px;
+}
+
+.io-qty__label {
+	color: var(--io-muted);
+	font-size: 0.74rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.io-qty__control {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	border: 1px solid var(--io-line);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.io-qty__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border: 0;
+	background: var(--io-white);
+	color: var(--io-blue);
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.io-qty__btn:hover {
+	background: var(--io-line);
+}
+
+.io-qty__input {
+	width: 40px;
+	height: 30px;
+	border: 0;
+	border-left: 1px solid var(--io-line);
+	border-right: 1px solid var(--io-line);
+	text-align: center;
+	font: inherit;
+	font-weight: 700;
+	color: var(--io-black);
+	-moz-appearance: textfield;
+}
+
+.io-qty__input::-webkit-outer-spin-button,
+.io-qty__input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 .io-axis {
@@ -346,7 +411,7 @@
 /* --- Resumen ----------------------------------------------------------- */
 
 .io-summary {
-	background: var(--io-black);
+	background: var(--io-blue);
 	border-radius: var(--io-radius);
 	padding: 16px 18px;
 	color: #fff;

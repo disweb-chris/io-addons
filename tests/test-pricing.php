@@ -262,6 +262,33 @@ $sel = IO_Addons_Pricing::sanitize_selection( array( 'items' => array( 'g' => ar
 $r = IO_Addons_Pricing::calculate( $config, $sel, 99.99 );
 check( 'porcentual redondea a 2 decimales', $r['extra'], 33.33 );
 
+/* ------------------------------------------------------------------ */
+echo "\n[8] Cantidad por ítem\n";
+
+$config = io_addons_sanitize_config( array( 'groups' => array(
+	array( 'id' => 'g', 'title' => 'Anillado', 'type' => 'group', 'items' => array(
+		array( 'id' => 'a', 'title' => 'Anillado', 'price' => 6000, 'allow_qty' => true, 'max_qty' => 5 ),
+		array( 'id' => 'b', 'title' => 'Sin cantidad', 'price' => 100 ),
+	) ),
+) ) );
+
+$sel = IO_Addons_Pricing::sanitize_selection( array( 'items' => array( 'g' => array( 'a' ) ), 'qty' => array( 'a' => 3 ) ) );
+$r = IO_Addons_Pricing::calculate( $config, $sel, 1000.0 );
+check( 'cantidad multiplica el precio del ítem', $r['extra'], 18000.0 );
+check( 'la línea guarda la cantidad elegida', $r['lines'][0]['qty'], 3 );
+
+$sel = IO_Addons_Pricing::sanitize_selection( array( 'items' => array( 'g' => array( 'a' ) ), 'qty' => array( 'a' => 50 ) ) );
+$r = IO_Addons_Pricing::calculate( $config, $sel, 1000.0 );
+check( 'la cantidad se acota al máximo configurado', $r['extra'], 30000.0 );
+
+$sel = IO_Addons_Pricing::sanitize_selection( array( 'items' => array( 'g' => array( 'a' ) ) ) );
+$r = IO_Addons_Pricing::calculate( $config, $sel, 1000.0 );
+check( 'sin cantidad enviada, default es 1', $r['extra'], 6000.0 );
+
+$sel = IO_Addons_Pricing::sanitize_selection( array( 'items' => array( 'g' => array( 'b' ) ), 'qty' => array( 'b' => 7 ) ) );
+$r = IO_Addons_Pricing::calculate( $config, $sel, 1000.0 );
+check( 'un ítem sin allow_qty ignora la cantidad enviada', $r['extra'], 100.0 );
+
 echo "\n----------------------------------------\n";
 echo "  $pass pruebas OK · $fail fallos\n";
 echo "----------------------------------------\n";

@@ -283,6 +283,11 @@ class IO_Addons_Cart {
 			$value = $line['item'];
 		}
 
+		if ( ! empty( $line['qty'] ) && (int) $line['qty'] > 1 ) {
+			/* translators: %d: cantidad. */
+			$value .= ' ' . sprintf( __( '×%d', 'io-addons' ), (int) $line['qty'] );
+		}
+
 		if ( ! empty( $line['amount'] ) && (float) $line['amount'] > 0 ) {
 			$value .= ' (+' . wp_strip_all_tags( wc_price( (float) $line['amount'] ) ) . ')';
 		} elseif ( isset( $line['kind'] ) && 'included' === $line['kind'] ) {

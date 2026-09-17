@@ -535,6 +535,10 @@
 					checkbox( item, 'included', i18n.included || 'Ya incluida' ),
 					checkbox( item, 'default', i18n.defaultOn || 'Marcada por defecto' )
 				] ),
+				el( 'div', { class: 'io-admin__row' }, [
+					checkbox( item, 'allow_qty', i18n.allowQty || 'Permite elegir cantidad', render ),
+					item.allow_qty ? field( i18n.maxQty || 'Cantidad máxima', textInput( item, 'max_qty', { type: 'number', emptyAsNull: true } ), 'io-admin__field--sm' ) : null
+				] ),
 				el( 'div', { class: 'io-admin__block' }, [
 					field( i18n.condition || 'Mostrar solo si…', select( item.condition, 'addon_id', itemChoices( item ) ) ),
 					select( item.condition, 'is', [
@@ -676,6 +680,8 @@
 						mandatory: false,
 						included: false,
 						default: false,
+						allow_qty: false,
+						max_qty: null,
 						condition: { addon_id: '', is: 'selected' },
 						variation_rules: { mode: 'all', variation_ids: [] },
 						axes: []

@@ -18,6 +18,7 @@ Si en el futuro hace falta mostrar una miniatura de muestra de un acabado, va **
 
 - **Grupos de opciones** con recargo: anillado, encuadernado, laminado, plastificado — o cualquier terminado nuevo.
 - **Ejes** dentro de cada opción: color de espiral, grosor de laminado, tipo de acabado…
+- **Cantidad por ítem**: un ítem marcado como "permite elegir cantidad" muestra un stepper +/- y el recargo se multiplica por la cantidad elegida (ej. "Anillado ×3" si un anillado cubre hasta 200 hojas y el pedido tiene más). Se puede acotar con una cantidad máxima opcional.
 - **Precio fijo o porcentual** (`% del precio del producto`), en ítems, ejes y campos.
 - **Reglas condicionales** entre addons: "laminado brillante solo si se eligió impresión a color".
 - **Reglas por variación**: un grupo o una opción puntual puede restringirse a variaciones concretas (`todas` / `solo estas` / `todas excepto estas`).
@@ -101,10 +102,10 @@ Filtros disponibles:
 ## Paleta
 
 ```css
---io-blue:   #2E509E;  /* acento secundario: estados de selección, foco */
+--io-blue:   #2E509E;  /* cabeceras de grupo, caja de resumen, foco */
 --io-white:  #F9FAFB;  /* fondo de tarjetas y superficies claras */
 --io-orange: #FF6B00;  /* acento principal: precios, badges, bordes */
---io-black:  #1D1D1A;  /* cabeceras de grupo y caja de resumen */
+--io-black:  #1D1D1A;  /* texto sobre fondos claros */
 ```
 
 ## Pruebas

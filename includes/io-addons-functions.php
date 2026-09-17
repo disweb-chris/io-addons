@@ -396,6 +396,8 @@ function io_addons_sanitize_config( $config ) {
 					'mandatory'       => ! empty( $item['mandatory'] ),
 					'included'        => ! empty( $item['included'] ),
 					'default'         => ! empty( $item['default'] ),
+					'allow_qty'       => ! empty( $item['allow_qty'] ),
+					'max_qty'         => isset( $item['max_qty'] ) && '' !== $item['max_qty'] && null !== $item['max_qty'] ? max( 1, absint( $item['max_qty'] ) ) : null,
 					'condition'       => io_addons_sanitize_condition( isset( $item['condition'] ) ? $item['condition'] : null ),
 					'variation_rules' => io_addons_sanitize_variation_rules( isset( $item['variation_rules'] ) ? $item['variation_rules'] : null ),
 					'axes'            => io_addons_sanitize_axes( isset( $item['axes'] ) ? $item['axes'] : array() ),

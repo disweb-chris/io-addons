@@ -153,6 +153,36 @@
 		}
 
 		/**
+		 * Lee y acota la cantidad elegida para un ítem (1 si no tiene stepper).
+		 * Corrige el valor mostrado si quedó fuera de rango (tipeo manual).
+		 *
+		 * @param {Object} entry Entrada de ítem.
+		 * @return {number} Cantidad.
+		 */
+		function resolveQty( entry ) {
+			var input = entry.el.querySelector( '.io-qty__input' );
+
+			if ( ! input ) {
+				return 1;
+			}
+
+			var min = parseInt( input.min, 10 ) || 1;
+			var max = input.max ? parseInt( input.max, 10 ) : null;
+			var value = parseInt( input.value, 10 );
+
+			if ( isNaN( value ) || value < min ) {
+				value = min;
+			}
+			if ( max && value > max ) {
+				value = max;
+			}
+
+			input.value = value;
+
+			return value;
+		}
+
+		/**
 		 * Calcula visibilidad por reglas de variación + condicionales.
 		 *
 		 * Mismo algoritmo que IO_Addons_Pricing::resolve_visibility() en PHP.
@@ -329,6 +359,7 @@
 						return;
 					}
 
+					var qty = resolveQty( entry );
 					var amount = itemAmount;
 					var axisLabels = [];
 
@@ -377,6 +408,7 @@
 						}
 					} );
 
+					amount = round( amount * qty );
 					extra += amount;
 
 					var titleEl = entry.el.querySelector( '.io-item__title' );
@@ -386,6 +418,7 @@
 						item: titleEl ? titleEl.textContent.trim() : '',
 						value: axisLabels.join( ' · ' ),
 						amount: amount,
+						qty: qty,
 						included: entry.included
 					} );
 				} );
@@ -463,6 +496,10 @@
 					text += ' · ' + line.value;
 				}
 
+				if ( line.qty > 1 ) {
+					text += ' ×' + line.qty;
+				}
+
 				row.appendChild( labelNode( text ) );
 
 				if ( line.included ) {
@@ -511,6 +548,38 @@
 				event.preventDefault();
 				this.checked = true;
 			}
+		} );
+
+		// Stepper de cantidad: +/- acotan al min/max del input y, si el ítem
+		// todavía no estaba marcado, elegir una cantidad lo selecciona.
+		$root.on( 'click', '.io-qty__btn', function ( event ) {
+			event.preventDefault();
+
+			var wrap = this.closest( '.io-item-wrap' );
+			var input = wrap ? wrap.querySelector( '.io-qty__input' ) : null;
+
+			if ( ! input ) {
+				return;
+			}
+
+			var min = parseInt( input.min, 10 ) || 1;
+			var max = input.max ? parseInt( input.max, 10 ) : null;
+			var value = parseInt( input.value, 10 ) || min;
+
+			value += this.hasAttribute( 'data-io-qty-plus' ) ? 1 : -1;
+			value = Math.max( min, value );
+			if ( max ) {
+				value = Math.min( max, value );
+			}
+
+			input.value = value;
+
+			var checkbox = wrap ? wrap.querySelector( '.io-item__input' ) : null;
+			if ( checkbox && ! checkbox.disabled && ! checkbox.checked ) {
+				checkbox.checked = true;
+			}
+
+			recalc();
 		} );
 
 		$root.on( 'change input', 'input, select, textarea', function () {

@@ -330,6 +330,8 @@ class IO_Addons_Admin {
 					'mandatory'      => __( 'Obligatoria (no se puede desmarcar)', 'io-addons' ),
 					'included'       => __( 'Ya incluida en el precio', 'io-addons' ),
 					'defaultOn'      => __( 'Marcada por defecto', 'io-addons' ),
+					'allowQty'       => __( 'Permite elegir cantidad', 'io-addons' ),
+					'maxQty'         => __( 'Cantidad máxima (vacío = sin límite)', 'io-addons' ),
 					'axes'           => __( 'Ejes (color, grosor, acabado…)', 'io-addons' ),
 					'addAxis'        => __( '+ Añadir eje', 'io-addons' ),
 					'axisName'       => __( 'Nombre del eje', 'io-addons' ),
