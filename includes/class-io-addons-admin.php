@@ -419,11 +419,12 @@ class IO_Addons_Admin {
 			wp_send_json_success( array( 'products' => array() ) );
 		}
 
-		// Palabras a exigir en el título, sin acentos y en minúsculas: el 's' de
-		// WP_Query puede devolver de más si hay un plugin de búsqueda/relevancia
-		// activo (SEO, indexador, etc.) que reordena o amplía por relevancia en
-		// vez de hacer un LIKE literal. Filtramos en PHP como garantía.
-		$needles = array_filter( explode( ' ', remove_accents( mb_strtolower( $term ) ) ) );
+		// Palabras a exigir en el título, sin acentos y en minúsculas. El 's' de
+		// WP_Query hace un LIKE '%término%' que matchea aunque el término caiga
+		// en medio de otra palabra (ej. "imp" dentro de "sIMPle") — filtramos acá
+		// exigiendo que cada palabra escrita sea el INICIO de alguna palabra del
+		// título, no una coincidencia en cualquier posición.
+		$needles = array_values( array_filter( explode( ' ', remove_accents( mb_strtolower( $term ) ) ) ) );
 
 		$query = new WP_Query(
 			array(
@@ -466,11 +467,21 @@ class IO_Addons_Admin {
 				continue;
 			}
 
-			$haystack = remove_accents( mb_strtolower( $product->get_name() ) );
-			$matches  = true;
+			$haystack_words = preg_split( '/[^\p{L}\p{N}]+/u', remove_accents( mb_strtolower( $product->get_name() ) ) );
+			$haystack_words = $haystack_words ? array_values( array_filter( $haystack_words ) ) : array();
+			$matches        = true;
 
 			foreach ( $needles as $needle ) {
-				if ( false === mb_strpos( $haystack, $needle ) ) {
+				$needle_found = false;
+
+				foreach ( $haystack_words as $word ) {
+					if ( 0 === mb_strpos( $word, $needle ) ) {
+						$needle_found = true;
+						break;
+					}
+				}
+
+				if ( ! $needle_found ) {
 					$matches = false;
 					break;
 				}
