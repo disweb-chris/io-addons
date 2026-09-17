@@ -242,27 +242,38 @@
 	letter-spacing: 0.05em;
 }
 
+/* !important a propósito: el tema aplica sus propios anchos/paddings a los
+   input[type=number] y botones dentro de form.cart, y sin esto el stepper
+   se ve estirado en vez de un control chico y compacto. */
 .io-qty__control {
-	display: inline-flex;
-	align-items: center;
-	gap: 0;
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
+	align-items: center !important;
+	gap: 0 !important;
+	width: auto !important;
 	border: 1px solid var(--io-line);
 	border-radius: 999px;
 	overflow: hidden;
 }
 
 .io-qty__btn {
-	display: inline-flex;
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
 	align-items: center;
 	justify-content: center;
-	width: 30px;
-	height: 30px;
-	border: 0;
+	width: 26px !important;
+	height: 26px !important;
+	min-width: 26px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
 	background: var(--io-white);
 	color: var(--io-blue);
-	font-size: 1.1rem;
+	font-size: 1rem;
 	line-height: 1;
 	cursor: pointer;
+	box-shadow: none !important;
 }
 
 .io-qty__btn:hover {
@@ -270,15 +281,25 @@
 }
 
 .io-qty__input {
-	width: 40px;
-	height: 30px;
-	border: 0;
-	border-left: 1px solid var(--io-line);
-	border-right: 1px solid var(--io-line);
+	flex: 0 0 auto !important;
+	width: 30px !important;
+	min-width: 30px !important;
+	max-width: 30px !important;
+	height: 26px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	border-left: 1px solid var(--io-line) !important;
+	border-right: 1px solid var(--io-line) !important;
+	border-radius: 0 !important;
+	background: #fff;
 	text-align: center;
 	font: inherit;
 	font-weight: 700;
+	font-size: 0.85rem;
 	color: var(--io-black);
+	line-height: 26px !important;
+	box-shadow: none !important;
 	-moz-appearance: textfield;
 }
 
@@ -443,7 +464,7 @@
 }
 
 .io-summary__amount {
-	color: var(--io-orange);
+	color: #fff;
 	font-weight: 700;
 	white-space: nowrap;
 }
@@ -466,7 +487,7 @@
 }
 
 .io-summary__total span:last-child {
-	color: var(--io-orange);
+	color: #fff;
 }
 
 /* Los importes de WooCommerce dentro del bloque siguen la paleta. */
